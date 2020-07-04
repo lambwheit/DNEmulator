@@ -71,13 +71,6 @@ namespace DNEmulator
             return (T)member;
         }
 
-
-        public ObjectValue Invoke(MethodBase methodBase, object[] parameters, object thisObject = null)
-        {
-            var returnValue = new ObjectValue(methodBase.Invoke(thisObject, parameters));
-            return returnValue;
-        }
-
         public Assembly Assembly
         {
             get;

@@ -13,7 +13,7 @@ namespace DNEmulator.OpCodes.Invocation
     public class Callvirt : Call
     {
         public override Code Code => Code.Callvirt;
-        public override EmulationRequirements Requirements => EmulationRequirements.MemberExecution;
+        public override EmulationRequirements Requirements => EmulationRequirements.None;
 
         public override EmulationResult Emulate(Context ctx)
         {

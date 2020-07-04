@@ -16,9 +16,9 @@ namespace DNEmulator.OpCodes.Misc
 
         public override EmulationResult Emulate(Context ctx)
         {
-            if (!(ctx.Instruction.Operand is IDnlibDef iDnlibDef))
+            if (!(ctx.Instruction.Operand is IDnlibDef dnlibDef))
                 throw new InvalidILException(ctx.Instruction.ToString());
-            var member = ctx.Emulator.DynamicContext.LookupMember<MemberInfo>(iDnlibDef.MDToken.ToInt32());
+            var member = ctx.Emulator.DynamicContext.LookupMember<MemberInfo>(dnlibDef.MDToken.ToInt32());
             object handle = null;
             switch(member)
             {
