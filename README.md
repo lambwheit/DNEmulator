@@ -12,19 +12,48 @@ Important namespaces:
 Creating a new instance of the emulator:
 ```C#
   var module = ModuleDefMD.Load(Assembly.GetEntryAssembly().Location);
-  var emulator = new Emulator(module.FindNormal("DNEmulator.Tests.Program").FindMethod("ToEmulate"));   
+  var emulator = new CILEmulator(module.FindNormal("DNEmulator.Tests.Program").FindMethod("ToEmulate"));   
 ```
 
 Creating a new instance of the emulator with parameter values:
 ```C#
   var module = ModuleDefMD.Load(Assembly.GetEntryAssembly().Location);
-  var emulator = new Emulator(module.FindNormal("DNEmulator.Tests.Program").FindMethod("ToEmulate"), new Value[] { new StringValue("abc"), new ObjectValue(new int[5]) });   
+  var emulator = new CILEmulator(module.FindNormal("DNEmulator.Tests.Program").FindMethod("ToEmulate"), new Value[] { new ObjectValue("abc"), new ObjectValue(new int[5]) });   
 ```
+
+By using the instantiations given above, the emulator will not support dynamic opcodes. Dynamic opcodes are opcodes which require loading of runtime assemblies or execution of parts of them. To support dynamic opcodes we need to create a new dynamic context and pass it as parameter to "CILEmulator":
+```C#
+  System.Reflection.Assembly assembly = ...;
+  var dynamicContext = new DynamicContext(assembly);
+  var emulator = new CILEmulator(..., dynamicContext);
+```
+
+Or create a dynamic context by using a loader:
+```C#
+  IAssemblyLoader assemblyLoader = ...;
+  var dynamicContext = new DynamicContext(assemblyLoader);
+```
+
+Load the Assembly by using the constructor of "DynamicContext" or by using the "Load" Functions:
+```C#
+  DynamicContext dynamicContext = ...;
+  byte[] assemblyBytes = ...;
+  dynamicContext.Load(assemblyBytes);
+  string assemblyPath = ...;
+  dynamicContext.Load(assemblyPath);
+```
+
+It will allow invocation by default. However you can disallow invocation by setting the flag in the constructor or by setting the "AllowInvocation" flag to "false"
+```C#
+  DynamicContext dynamicContext = ...;
+  dynamicContext.AllowInvocation = false;
+```
+  
 
 Emulating Method:
 ```C#
   var module = ModuleDefMD.Load(Assembly.GetEntryAssembly().Location);
-  var emulator = new Emulator(module.FindNormal("DNEmulator.Tests.Program").FindMethod("ToEmulate")); 
+  var emulator = new CILEmulator(module.FindNormal("DNEmulator.Tests.Program").FindMethod("ToEmulate")); 
   emulator.Emulate();
 ```
 
@@ -32,10 +61,10 @@ Emulating Instruction:
 ```C#
   var module = ModuleDefMD.Load(Assembly.GetEntryAssembly().Location);
   var method = module.FindNormal("DNEmulator.Tests.Program").FindMethod("ToEmulate");
-  var emulator = new Emulator(method); 
+  var emulator = new CILEmulator(method); 
   foreach(var instruction in method.Body.Instructions)
   {
-   var result = emulator.EmulateInstruction(instruction);
+     var result = emulator.EmulateInstruction(instruction);
   }
 ```
 
@@ -69,10 +98,10 @@ Events:
 ```C#
   static void Main(string[] args)
   {
-   var module = ModuleDefMD.Load(Assembly.GetEntryAssembly().Location);
-   var emulator = new Emulator(module.FindNormal("DNEmulator.Tests.Program").FindMethod("ToEmulate"));
-   emulator.BeforeEmulation += BeforeEmulation;
-   emulator.AfterEmulation += AfterEmulation;        
+     var module = ModuleDefMD.Load(Assembly.GetEntryAssembly().Location);
+     var emulator = new CILEmulator(module.FindNormal("DNEmulator.Tests.Program").FindMethod("ToEmulate"));
+     emulator.BeforeEmulation += BeforeEmulation;
+     emulator.AfterEmulation += AfterEmulation;        
   }
   
   private static void BeforeEmulation(Instruction instruction)
@@ -92,7 +121,6 @@ Events:
   DNEmulator.Values.I8Value -> int64 value (I8)
   DNEmulator.Values.NativeValue -> native int value (I)
   DNEmulator.Values.ObjectValue -> object value (O)
-  DNEmulator.Values.StringValue -> string value (S)
   DNEmulator.Values.R8Value -> float(32/64) value (F)
   DNEmulator.Values.UnknownValue -> unknown value
 ```
@@ -102,6 +130,13 @@ Events:
   DNEmulator.EmulationResults.NormalResult -> emulation will continue
   DNEmulator.EmulationResults.JumpResult -> emulator will jump to instruction at given index
   DNEmulator.EmulationResults.ReturnResult -> emulation will end
+```
+
+# Dynamic Loaders
+```
+  DNEmulator.Dynamic.NETCore.NETCoreAssemblyLoader -> is able to load every .NET Core Assembly
+  DNEmulator.Dynamic.NETCore.NETFrameworkAssemblyLoader -> is able to load every .NET Framework Assembly
+  DNEmulator.Abstractions.IAssemblyLoader -> provides methods that every assembly loader should have and makes it possible to create own custom assembly loaders
 ```
 
 # Discord
