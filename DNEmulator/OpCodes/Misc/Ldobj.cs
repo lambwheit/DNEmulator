@@ -12,7 +12,7 @@ namespace DNEmulator.OpCodes.Misc
     public class Ldobj : OpCodeEmulator
     {
         public override Code Code => Code.Ldobj;
-        public override EmulationRequirements Requirements => EmulationRequirements.None;
+        public override EmulationRequirements Requirements => EmulationRequirements.MemberLoading;
 
         public override EmulationResult Emulate(Context ctx)
         {
@@ -22,13 +22,8 @@ namespace DNEmulator.OpCodes.Misc
             if (!(ctx.Instruction.Operand is ITypeDefOrRef typeDefOrRef))
                 throw new InvalidILException(ctx.Instruction.ToString());
 
-            var type = Type.GetType(typeDefOrRef.FullName);
-            if (type == null)
-            {
-                ctx.Stack.Push(new ObjectValue(null));
-                return new NormalResult();
-            }
-
+            var type = ctx.Emulator.DynamicContext.LookupMember<Type>(typeDefOrRef.MDToken.ToInt32());
+            
             ctx.Stack.Push(new ObjectValue(Marshal.PtrToStructure(address.Value, type)));
             return new NormalResult();
         }
