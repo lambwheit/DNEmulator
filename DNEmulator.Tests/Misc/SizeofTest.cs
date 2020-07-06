@@ -29,7 +29,6 @@ namespace DNEmulator.Tests.Misc
             var assembly = typeof(SizeofTest).Assembly;
             var module = ModuleDefMD.Load(assembly.Location);
             var dynamicContext = new DynamicContext(assembly);
-
             var cilEmulator = new CILEmulator(module.FindNormal("DNEmulator.Tests.Misc.SizeofTest").FindMethod("TestMethod"),
                               dynamicContext);
             cilEmulator.Emulate();
