@@ -34,9 +34,7 @@ namespace DNEmulator.OpCodes.Conditionals
                     statement = ((R8Value)firstValue).Value > ((R8Value)secondValue).Value;
                     break;
                 case DNValueType.Object when secondValue.ValueType == DNValueType.Object:
-                    if (((ObjectValue)secondValue).Value != null)
-                        throw new InvalidStackException();
-                    statement = ((ObjectValue)firstValue).Value != null;
+                    statement = ((ObjectValue)firstValue).Value != ((ObjectValue)secondValue).Value;
                     break;
                 case DNValueType.Native when secondValue.ValueType == DNValueType.Native:
                     statement = (ulong)((NativeValue)firstValue).Value > (ulong)((NativeValue)secondValue).Value;
