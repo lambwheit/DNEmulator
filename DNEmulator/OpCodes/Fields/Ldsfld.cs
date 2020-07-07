@@ -13,10 +13,12 @@ namespace DNEmulator.OpCodes.Fields
 
         public override EmulationResult Emulate(Context ctx)
         {
-            if (!(ctx.Instruction.Operand is IField field))
+            if (!(ctx.Instruction.Operand is IField iField))
                 throw new InvalidILException(ctx.Instruction.ToString());
 
-            if (!field.ResolveFieldDef().IsStatic)
+            var field = (iField is FieldDef fieldDef) ? fieldDef : iField.ResolveFieldDef();
+
+            if (!field.IsStatic)
                 throw new InvalidILException(ctx.Instruction.ToString());
 
             ctx.Stack.Push(ctx.Emulator.FieldMap.Get(field));

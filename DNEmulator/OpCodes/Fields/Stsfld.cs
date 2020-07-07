@@ -15,10 +15,11 @@ namespace DNEmulator.OpCodes.Fields
         {
             var firstValue = ctx.Stack.Pop();
 
-            if (!(ctx.Instruction.Operand is IField field))
+            if (!(ctx.Instruction.Operand is IField iField))
                 throw new InvalidILException(ctx.Instruction.ToString());
 
-            if (!field.ResolveFieldDef().IsStatic)
+            var field = (iField is FieldDef fieldDef) ? fieldDef : iField.ResolveFieldDef();
+            if (!field.IsStatic)
                 throw new InvalidILException(ctx.Instruction.ToString());
 
             ctx.Emulator.FieldMap.Set(field, firstValue);
