@@ -5,26 +5,28 @@ using DNEmulator.Values;
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
 using System;
-using System.Runtime.InteropServices;
 
 namespace DNEmulator.OpCodes.Misc
 {
-    public class Ldobj : OpCodeEmulator
+    public class Isinst : OpCodeEmulator
     {
-        public override Code Code => Code.Ldobj;
+        public override Code Code => Code.Isinst;
+
         public override EmulationRequirements Requirements => EmulationRequirements.MemberLoading;
 
         public override EmulationResult Emulate(Context ctx)
         {
-            if (!(ctx.Stack.Pop() is NativeValue address))
-                throw new InvalidStackException();
-
-            if (!(ctx.Instruction.Operand is ITypeDefOrRef typeDefOrRef))
+            if (!(ctx.Instruction.Operand is IType iType))
                 throw new InvalidILException(ctx.Instruction.ToString());
 
-            var type = ctx.Emulator.DynamicContext.LookupMember<Type>(typeDefOrRef.MDToken.ToInt32());
-            
-            ctx.Stack.Push(new ObjectValue(Marshal.PtrToStructure(address.Value, type)));
+            object obj = ctx.Stack.Pop().GetValue();
+            var type = ctx.Emulator.DynamicContext.LookupMember<Type>(iType.MDToken.ToInt32());
+
+            if (!type.IsAssignableFrom(obj.GetType()))
+                ctx.Stack.Push(new ObjectValue(null));
+            else
+                ctx.Stack.Push(Value.FromObject(Convert.ChangeType(obj, type)));
+
             return new NormalResult();
         }
     }

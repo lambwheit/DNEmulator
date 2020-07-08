@@ -1,5 +1,8 @@
-﻿using DNEmulator.Values;
+﻿using DNEmulator.EmulationResults;
+using DNEmulator.Values;
 using System;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace DNEmulator.Abstractions
 {
@@ -18,7 +21,6 @@ namespace DNEmulator.Abstractions
             str = null;
             if (!(this is ObjectValue objectValue && objectValue.Value is string))
                 return false;
-
             str = (string)objectValue.Value;
             return true;
         }
@@ -34,26 +36,29 @@ namespace DNEmulator.Abstractions
         };
 
 
-        public static Value FromObject(object value) => Type.GetTypeCode(value.GetType()) switch
+        public unsafe static Value FromObject(object value)
         {
-            TypeCode.Boolean => new I4Value(((bool)value) ? 1 : 0),
-            TypeCode.Char => new I4Value((char)value),
-            TypeCode.Byte => new I4Value((byte)value),
-            TypeCode.Double => new R8Value((double)value),
-            TypeCode.Int16 => new I4Value((short)value),
-            TypeCode.Int32 => new I4Value((int)value),
-            TypeCode.Int64 => new I8Value((long)value),
-            TypeCode.SByte => new I4Value((sbyte)value),
-            TypeCode.Single => new R8Value((float)value),
-            TypeCode.UInt16 => new I4Value((ushort)value),
-            TypeCode.UInt32 => new I4Value((int)(uint)value),
-            TypeCode.UInt64 => new I8Value((long)(ulong)value),
-            _ => new ObjectValue(value),
-        };
+            var type = value.GetType();
+            if (type == typeof(IntPtr) || type == typeof(UIntPtr))
+                return new NativeValue((IntPtr)value);
 
-
-
-
+            return Type.GetTypeCode(type) switch
+            {
+                TypeCode.Boolean => new I4Value(((bool)value) ? 1 : 0),
+                TypeCode.Char => new I4Value((char)value),
+                TypeCode.Byte => new I4Value((byte)value),
+                TypeCode.Double => new R8Value((double)value),
+                TypeCode.Int16 => new I4Value((short)value),
+                TypeCode.Int32 => new I4Value((int)value),
+                TypeCode.Int64 => new I8Value((long)value),
+                TypeCode.SByte => new I4Value((sbyte)value),
+                TypeCode.Single => new R8Value((float)value),
+                TypeCode.UInt16 => new I4Value((ushort)value),
+                TypeCode.UInt32 => new I4Value((int)(uint)value),
+                TypeCode.UInt64 => new I8Value((long)(ulong)value),
+                _ => new ObjectValue(value),
+            };
+        }
 
     }
 }

@@ -1,27 +1,27 @@
 ﻿using DNEmulator.Abstractions;
 using DNEmulator.EmulationResults;
 using DNEmulator.Exceptions;
+using DNEmulator.Values;
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
+using System.Reflection;
 
 namespace DNEmulator.OpCodes.Fields
 {
-    public class Ldsfld : OpCodeEmulator
+    public class Ldsflda : OpCodeEmulator
     {
-        public override Code Code => Code.Ldsfld;
-        public override EmulationRequirements Requirements => EmulationRequirements.None;
+        public override Code Code => Code.Ldsflda;
+
+        public override EmulationRequirements Requirements => EmulationRequirements.MemberLoading;
 
         public override EmulationResult Emulate(Context ctx)
         {
             if (!(ctx.Instruction.Operand is IField iField))
                 throw new InvalidILException(ctx.Instruction.ToString());
 
-            var field = (iField is FieldDef fieldDef) ? fieldDef : iField.ResolveFieldDef();
+            var fieldInfo = ctx.Emulator.DynamicContext.LookupMember<FieldInfo>(iField.MDToken.ToInt32());
+            ctx.Stack.Push(new NativeValue(fieldInfo.FieldHandle.Value));
 
-            if (!field.IsStatic)
-                throw new InvalidILException(ctx.Instruction.ToString());
-
-            ctx.Stack.Push(ctx.Emulator.FieldMap.Get(field));
             return new NormalResult();
         }
     }

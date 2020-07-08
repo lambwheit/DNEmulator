@@ -12,7 +12,7 @@ namespace DNEmulator.Tests.Invocation
         {
             var assembly = typeof(CallvirtTest).Assembly;
             var module = ModuleDefMD.Load(assembly.Location);
-            Resolve(module);
+            Resolver.Resolve(module);
             var dynamicContext = new DynamicContext(assembly)
             {
                 AllowInvocation = true,
@@ -27,20 +27,7 @@ namespace DNEmulator.Tests.Invocation
             Assert.AreEqual(toString, (char)emulatedToString.Value);
         }
 
-        private void Resolve(ModuleDef module)
-        {
-            var asmResolver = new AssemblyResolver();
-            var modCtx = new ModuleContext(asmResolver);
-            asmResolver.DefaultModuleContext = modCtx;
-            module.Context = modCtx;
-            asmResolver.EnableTypeDefCache = true;
-            foreach (var asmRef in module.GetAssemblyRefs())
-            {
-                var def = asmResolver.Resolve(asmRef, module);
-                asmResolver.AddToCache(def);
-            }
-        }
-
+     
         private char TestMethod()
         {
             var obj = new Obj("Hello");

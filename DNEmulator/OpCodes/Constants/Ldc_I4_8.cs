@@ -1,6 +1,5 @@
 ﻿using DNEmulator.Abstractions;
 using DNEmulator.EmulationResults;
-
 using DNEmulator.Values;
 using dnlib.DotNet.Emit;
 

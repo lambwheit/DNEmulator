@@ -54,7 +54,7 @@ namespace DNEmulator
 
 
 
-        public delegate void EmulationEventHandler(Instruction instruction);
+        public delegate void EmulationEventHandler(Context emulatorContext);
         public event EmulationEventHandler BeforeEmulation;
         public event EmulationEventHandler AfterEmulation;
 
@@ -63,6 +63,7 @@ namespace DNEmulator
         {
             get;
         } = new ValueStack();
+
         public MethodDef Method
         {
             get;
@@ -95,9 +96,9 @@ namespace DNEmulator
             do
             {
                 var instruction = Method.Body.Instructions[_index++];
-                BeforeEmulation?.Invoke(instruction);
+                BeforeEmulation?.Invoke(_context);
                 var result = EmulateInstruction(instruction);
-                AfterEmulation?.Invoke(instruction);
+                AfterEmulation?.Invoke(_context);
                 state = result.State;
                 if (state == EmulationState.Jump)
                     _index = ((JumpResult)result).Index;

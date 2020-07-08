@@ -32,6 +32,9 @@ namespace DNEmulator.OpCodes.Conditionals
                 case DNValueType.Real when secondValue.ValueType == DNValueType.Real:
                     statement = ((R8Value)firstValue).Value > ((R8Value)secondValue).Value;
                     break;
+                case DNValueType.Object when secondValue.ValueType == DNValueType.Object:
+                    statement = ((ObjectValue)firstValue).Value != ((ObjectValue)secondValue).Value;
+                    break;
                 case DNValueType.Native when secondValue.ValueType == DNValueType.Native:
                     statement = (long)((NativeValue)firstValue).Value > (long)((NativeValue)secondValue).Value;
                     break;
